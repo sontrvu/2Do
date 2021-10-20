@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import TaskInput from './TaskInput';
+import FlashAlert from './FlashAlert';
 
 const DATA = [
   {
@@ -57,6 +58,9 @@ function setCompletedTask(task, isCompleted) {
 export default function Main() {
   separateData();
 
+  const [alertMassage, setAlertMassage] = useState('');
+  const [shouldShowAlert, setShouldShowAlert] = useState(false);
+
   const [isUpdating, setIsUpdating] = useState(false);
   const [taskToBeUpdated, setTaskToBeUpdated] = useState({});
   const [needUpdateData, setNeedUpdateData] = useState(false);
@@ -71,10 +75,29 @@ export default function Main() {
     reloadList();
   };
 
-  const addNewTask = (newTask) => {
-    DATA.push(newTask);
+  const addNewTask = (taskContent) => {
+    if (taskContent.trim().length === 0) {
+      console.log('Here');
+      showAlert('Content cannot be blank');
+      return false;
+    }
+
+    const task = {
+      id: Math.random().toString(),
+      name: taskContent,
+      isCompleted: false,
+    };
+
+    DATA.push(task);
     reloadList();
+
+    return true;
   };
+
+  function showAlert(message) {
+    setAlertMassage(message);
+    setShouldShowAlert(true);
+  }
 
   const renderItem = ({ item }) => (
     <Item
@@ -122,8 +145,10 @@ export default function Main() {
       <TaskInput
         isUpdating={isUpdating}
         taskToBeUpdated={taskToBeUpdated}
-        onNewTaskAdded={(newTask) => addNewTask(newTask)}
+        onAddButtonPressed={(text) => addNewTask(text)}
       />
+
+      <FlashAlert message={alertMassage} showAlert={shouldShowAlert} onFinished={() => setShouldShowAlert(false)} />
     </SafeAreaView>
   );
 }

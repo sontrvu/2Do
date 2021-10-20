@@ -11,23 +11,18 @@ import {
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 
-export default function TaskInput({ isUpdating, taskToBeUpdated, onTaskUpdated, onNewTaskAdded }) {
+export default function TaskInput({ isUpdating, taskToBeUpdated, onTaskUpdated, onAddButtonPressed }) {
   let addStyle = isUpdating ? { display: 'none' } : {};
   let updateStyle = isUpdating ? {} : { display: 'none' };
 
   let newTaskTextInput;
-  const [newTaskContent, setNewTaskContent] = useState('');
-  const addNewTask = () => {
-    const task = {
-      id: Math.random().toString(),
-      name: newTaskContent,
-      isCompleted: false,
-    };
+  const [addText, setAddText] = useState('');
 
-    newTaskTextInput.clear();
-    Keyboard.dismiss();
-
-    onNewTaskAdded(task);
+  const handleAddButtonPressed = () => {
+    if (onAddButtonPressed(addText) === true) {
+      newTaskTextInput.clear();
+      Keyboard.dismiss();
+    }
   };
 
   let uppdateTaskTextInput;
@@ -45,12 +40,12 @@ export default function TaskInput({ isUpdating, taskToBeUpdated, onTaskUpdated, 
         <TextInput
           style={styles.bottomTextInput}
           placeholder={'Add a new task'}
-          onChangeText={(text) => setNewTaskContent(text)}
+          onChangeText={(text) => setAddText(text)}
           ref={(input) => {
             newTaskTextInput = input;
           }}
         />
-        <TouchableOpacity style={styles.addButton} onPress={addNewTask}>
+        <TouchableOpacity style={styles.addButton} onPress={handleAddButtonPressed}>
           <Ionicons name="arrow-up-circle" size={35} color="teal" />
         </TouchableOpacity>
       </View>
