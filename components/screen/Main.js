@@ -22,6 +22,7 @@ export default function Main() {
   const { pendingTasks, completedTasks } = useSelector((state) => state.task);
   const dispatch = useDispatch();
 
+  // Fetch tasks on app opening
   useEffect(() => {
     dispatch(fetchTasks());
   }, []);
@@ -82,7 +83,7 @@ export default function Main() {
         setIsUpdating(true);
         setTaskToBeUpdated(itemData);
       }}
-      onTaskCompleted={(itemData, isCompleted) => setTaskToBeCompleted(itemData, isCompleted)}
+      onCheckPressed={(itemData, isCompleted) => setTaskToBeCompleted(itemData, isCompleted)}
     />
   );
 
@@ -129,13 +130,13 @@ export default function Main() {
   );
 }
 
-function Item({ itemData, onCellPressed, onTaskCompleted }) {
+function Item({ itemData, onCellPressed, onCheckPressed }) {
   let [isChecked, setIsChecked] = useState(itemData.isCompleted);
 
-  const onPress = () => {
+  const handleCheckPressed = () => {
     isChecked = !isChecked;
     setIsChecked(isChecked);
-    onTaskCompleted(itemData, isChecked);
+    onCheckPressed(itemData, isChecked);
   };
 
   const iconName = isChecked ? 'checkmark-circle-sharp' : 'ellipse-outline';
@@ -144,7 +145,7 @@ function Item({ itemData, onCellPressed, onTaskCompleted }) {
   return (
     <TouchableOpacity style={styles.itemContainer} onPress={() => onCellPressed(itemData)}>
       <View style={{}}>
-        <TouchableOpacity onPress={onPress}>
+        <TouchableOpacity onPress={handleCheckPressed}>
           <Ionicons name={iconName} size={30} color="teal" />
         </TouchableOpacity>
       </View>

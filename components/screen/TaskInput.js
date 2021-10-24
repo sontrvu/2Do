@@ -18,13 +18,27 @@ export default function TaskInput({
   onUpdateButtonPressed,
   onDeleteButtonPressed,
 }) {
+  // There are 2 inputs for add and update task, toggle to show only 1 and hide the other
   let addStyle = isUpdating ? { display: 'none' } : {};
   let updateStyle = isUpdating ? {} : { display: 'none' };
 
   let newTaskTextInput;
+  let uppdateTaskTextInput;
   const [addText, setAddText] = useState('');
   const [updateText, setUpdateText] = useState(selectedTask.name);
 
+  // Show keyboard and update task input content when a task is selected to edit
+  useEffect(() => {
+    if (isUpdating) {
+      uppdateTaskTextInput.focus();
+    } else {
+      Keyboard.dismiss();
+    }
+
+    setUpdateText(selectedTask.name);
+  }, [isUpdating, selectedTask]);
+
+  // Handle buttons pressed ...
   const handleAddButtonPressed = () => {
     if (onAddButtonPressed(addText) === true) {
       setAddText('');
@@ -33,10 +47,7 @@ export default function TaskInput({
   };
 
   const handleUpdateButtonPressed = () => {
-    let updatedTask = {
-      ...selectedTask,
-      name: updateText,
-    };
+    let updatedTask = { ...selectedTask, name: updateText };
 
     if (onUpdateButtonPressed(updatedTask) === true) {
       setUpdateText('');
@@ -47,17 +58,6 @@ export default function TaskInput({
   const handleDeleteButtonPressed = () => {
     onDeleteButtonPressed(selectedTask);
   };
-
-  let uppdateTaskTextInput;
-  useEffect(() => {
-    if (isUpdating) {
-      uppdateTaskTextInput.focus();
-    } else {
-      Keyboard.dismiss();
-    }
-
-    setUpdateText(selectedTask.name);
-  }, [isUpdating, selectedTask]);
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
