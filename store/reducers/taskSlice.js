@@ -40,6 +40,22 @@ const taskSlice = createSlice({
       });
     },
 
+    updateTask: (state, action) => {
+      let task = action.payload;
+
+      let pIdx = state.pendingTasks.findIndex((obj) => obj.id == task.id);
+      if (pIdx != -1) {
+        state.pendingTasks[pIdx].name = task.name;
+        return;
+      }
+
+      let cIdx = state.completedTasks.findIndex((obj) => obj.id == task.id);
+      if (cIdx != -1) {
+        state.completedTasks[cIdx].name = task.name;
+        return;
+      }
+    },
+
     deleteTask: (state, action) => {
       let taskId = action.payload;
 
@@ -74,5 +90,5 @@ const taskSlice = createSlice({
   },
 });
 
-export const { addTask, deleteTask, setCompletedTask } = taskSlice.actions;
+export const { addTask, updateTask, deleteTask, setCompletedTask } = taskSlice.actions;
 export default taskSlice.reducer;

@@ -15,13 +15,13 @@ import TaskInput from './TaskInput';
 import FlashAlert from './FlashAlert';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { addTask, deleteTask, setCompletedTask } from '../../store/reducers/taskSlice';
+import { addTask, updateTask, deleteTask, setCompletedTask } from '../../store/reducers/taskSlice';
 
 export default function Main() {
   const { pendingTasks, completedTasks } = useSelector((state) => state.task);
   const dispatch = useDispatch();
 
-  const addNewTask = (taskContent) => {
+  const handleAddNewTask = (taskContent) => {
     if (taskContent.trim().length === 0) {
       showAlert('Content cannot be blank');
       return false;
@@ -31,6 +31,25 @@ export default function Main() {
     return true;
   };
 
+  const handleUpdateTask = (itemData) => {
+    if (itemData.name.trim().length === 0) {
+      showAlert('Content cannot be blank');
+      return false;
+    }
+
+    console.log('shit');
+
+    dispatch(updateTask(itemData));
+    setIsUpdating(false);
+    return true;
+  };
+
+  const handleDeleteTask = (itemData) => {
+    dispatch(deleteTask(itemData.id));
+
+    setIsUpdating(false);
+  };
+
   const setTaskToBeCompleted = (itemData, isCompleted) => {
     let data = {
       ...itemData,
@@ -38,12 +57,6 @@ export default function Main() {
     };
 
     dispatch(setCompletedTask(data));
-  };
-
-  const handleDeleteTask = (itemData) => {
-    dispatch(deleteTask(itemData.id));
-
-    setIsUpdating(false);
   };
 
   const [alertMassage, setAlertMassage] = useState('');
@@ -100,8 +113,9 @@ export default function Main() {
 
       <TaskInput
         isUpdating={isUpdating}
-        taskToBeUpdated={taskToBeUpdated}
-        onAddButtonPressed={(text) => addNewTask(text)}
+        selectedTask={taskToBeUpdated}
+        onAddButtonPressed={(text) => handleAddNewTask(text)}
+        onUpdateButtonPressed={(task) => handleUpdateTask(task)}
         onDeleteButtonPressed={(task) => handleDeleteTask(task)}
       />
 

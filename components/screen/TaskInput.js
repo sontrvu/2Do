@@ -9,11 +9,11 @@ import {
   Platform,
   Keyboard,
 } from 'react-native';
-import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function TaskInput({
   isUpdating,
-  taskToBeUpdated,
+  selectedTask,
   onAddButtonPressed,
   onUpdateButtonPressed,
   onDeleteButtonPressed,
@@ -23,6 +23,7 @@ export default function TaskInput({
 
   let newTaskTextInput;
   const [addText, setAddText] = useState('');
+  const [updateText, setUpdateText] = useState(selectedTask.name);
 
   const handleAddButtonPressed = () => {
     if (onAddButtonPressed(addText) === true) {
@@ -31,8 +32,20 @@ export default function TaskInput({
     }
   };
 
+  const handleUpdateButtonPressed = () => {
+    let updatedTask = {
+      ...selectedTask,
+      name: updateText,
+    };
+
+    if (onUpdateButtonPressed(updatedTask) === true) {
+      newTaskTextInput.clear();
+      Keyboard.dismiss();
+    }
+  };
+
   const handleDeleteButtonPressed = () => {
-    onDeleteButtonPressed(taskToBeUpdated);
+    onDeleteButtonPressed(selectedTask);
   };
 
   let uppdateTaskTextInput;
@@ -42,7 +55,9 @@ export default function TaskInput({
     } else {
       Keyboard.dismiss();
     }
-  }, [isUpdating]);
+
+    setUpdateText(selectedTask.name);
+  }, [isUpdating, selectedTask]);
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
@@ -67,12 +82,13 @@ export default function TaskInput({
         <TextInput
           style={styles.bottomTextInput}
           placeholder={'Should be something here'}
-          value={taskToBeUpdated.name}
+          value={updateText}
+          onChangeText={(text) => setUpdateText(text)}
           ref={(input) => {
             uppdateTaskTextInput = input;
           }}
         />
-        <TouchableOpacity style={styles.updateButton}>
+        <TouchableOpacity style={styles.updateButton} onPress={handleUpdateButtonPressed}>
           <Ionicons name="arrow-up-circle-outline" size={35} color="teal" />
         </TouchableOpacity>
       </View>
