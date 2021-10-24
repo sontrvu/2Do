@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 let SPRING_CONFIG = { tension: 2, friction: 3 }; //Soft spring
 
 export default function FlashAlert({ message, showAlert, onFinished }) {
-  const [viewHeight, setViewHeight] = useState(0);
+  const [viewHeight, setViewHeight] = useState(100);
   const floatAnim = useRef(new Animated.ValueXY()).current; // Initial value for transform
   const animStyle = { transform: floatAnim.getTranslateTransform() };
 

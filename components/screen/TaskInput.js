@@ -27,7 +27,7 @@ export default function TaskInput({
 
   const handleAddButtonPressed = () => {
     if (onAddButtonPressed(addText) === true) {
-      newTaskTextInput.clear();
+      setAddText('');
       Keyboard.dismiss();
     }
   };
@@ -39,7 +39,7 @@ export default function TaskInput({
     };
 
     if (onUpdateButtonPressed(updatedTask) === true) {
-      newTaskTextInput.clear();
+      setUpdateText('');
       Keyboard.dismiss();
     }
   };
@@ -61,10 +61,14 @@ export default function TaskInput({
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      {/* Only show either add or update input */}
+
+      {/* Add task input */}
       <View style={[styles.bottomInputContainer, addStyle]}>
         <TextInput
           style={styles.bottomTextInput}
           placeholder={'Add a new task'}
+          value={addText}
           onChangeText={(text) => setAddText(text)}
           ref={(input) => {
             newTaskTextInput = input;
@@ -75,6 +79,7 @@ export default function TaskInput({
         </TouchableOpacity>
       </View>
 
+      {/* Update task input */}
       <View style={[styles.bottomInputContainer, updateStyle]}>
         <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteButtonPressed}>
           <Text style={styles.deleteButtonTitle}>Delete</Text>

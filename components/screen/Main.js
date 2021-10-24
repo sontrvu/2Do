@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -15,11 +15,16 @@ import TaskInput from './TaskInput';
 import FlashAlert from './FlashAlert';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { addTask, updateTask, deleteTask, setCompletedTask } from '../../store/reducers/taskSlice';
+import { fetchTasks, addTask, updateTask, deleteTask, setCompletedTask } from '../../store/reducers/taskSlice';
 
 export default function Main() {
+  // Data logic handles
   const { pendingTasks, completedTasks } = useSelector((state) => state.task);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchTasks());
+  }, []);
 
   const handleAddNewTask = (taskContent) => {
     if (taskContent.trim().length === 0) {
@@ -36,8 +41,6 @@ export default function Main() {
       showAlert('Content cannot be blank');
       return false;
     }
-
-    console.log('shit');
 
     dispatch(updateTask(itemData));
     setIsUpdating(false);
@@ -59,6 +62,7 @@ export default function Main() {
     dispatch(setCompletedTask(data));
   };
 
+  // UI logic handles
   const [alertMassage, setAlertMassage] = useState('');
   const [shouldShowAlert, setShouldShowAlert] = useState(false);
 
@@ -70,6 +74,7 @@ export default function Main() {
     setShouldShowAlert(true);
   }
 
+  // Views
   const renderItem = ({ item }) => (
     <Item
       itemData={item}
