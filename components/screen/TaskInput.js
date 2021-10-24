@@ -11,7 +11,13 @@ import {
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 
-export default function TaskInput({ isUpdating, taskToBeUpdated, onTaskUpdated, onAddButtonPressed }) {
+export default function TaskInput({
+  isUpdating,
+  taskToBeUpdated,
+  onAddButtonPressed,
+  onUpdateButtonPressed,
+  onDeleteButtonPressed,
+}) {
   let addStyle = isUpdating ? { display: 'none' } : {};
   let updateStyle = isUpdating ? {} : { display: 'none' };
 
@@ -23,6 +29,10 @@ export default function TaskInput({ isUpdating, taskToBeUpdated, onTaskUpdated, 
       newTaskTextInput.clear();
       Keyboard.dismiss();
     }
+  };
+
+  const handleDeleteButtonPressed = () => {
+    onDeleteButtonPressed(taskToBeUpdated);
   };
 
   let uppdateTaskTextInput;
@@ -51,7 +61,7 @@ export default function TaskInput({ isUpdating, taskToBeUpdated, onTaskUpdated, 
       </View>
 
       <View style={[styles.bottomInputContainer, updateStyle]}>
-        <TouchableOpacity style={styles.deleteButton}>
+        <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteButtonPressed}>
           <Text style={styles.deleteButtonTitle}>Delete</Text>
         </TouchableOpacity>
         <TextInput

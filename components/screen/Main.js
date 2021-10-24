@@ -10,89 +10,47 @@ import {
   Platform,
   StatusBar,
 } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import TaskInput from './TaskInput';
 import FlashAlert from './FlashAlert';
 
-const DATA = [
-  {
-    id: '1',
-    name: 'Dimsum',
-    isCompleted: false,
-  },
-  {
-    id: '2',
-    name: 'Second Item',
-    isCompleted: false,
-  },
-  {
-    id: '3',
-    name: 'Third Item',
-    isCompleted: false,
-  },
-  {
-    id: '4',
-    name: '4rd Item Hehehe',
-    isCompleted: true,
-  },
-];
-
-let pendingTask = [];
-let completedTask = [];
-
-function separateData() {
-  [pendingTask, completedTask] = DATA.reduce(
-    (result, item) => {
-      result[item.isCompleted ? 1 : 0].push(item);
-      return result;
-    },
-    [[], []]
-  );
-}
-
-function setCompletedTask(task, isCompleted) {
-  let itemIdx = DATA.findIndex((obj) => obj.id == task.id);
-  DATA[itemIdx].isCompleted = isCompleted;
-}
+import { useDispatch, useSelector } from 'react-redux';
+import { addTask, deleteTask, setCompletedTask } from '../../store/reducers/taskSlice';
 
 export default function Main() {
-  separateData();
+  const { pendingTasks, completedTasks } = useSelector((state) => state.task);
+  const dispatch = useDispatch();
+
+  const addNewTask = (taskContent) => {
+    if (taskContent.trim().length === 0) {
+      showAlert('Content cannot be blank');
+      return false;
+    }
+
+    dispatch(addTask(taskContent));
+    return true;
+  };
+
+  const setTaskToBeCompleted = (itemData, isCompleted) => {
+    let data = {
+      ...itemData,
+      isCompleted: isCompleted,
+    };
+
+    dispatch(setCompletedTask(data));
+  };
+
+  const handleDeleteTask = (itemData) => {
+    dispatch(deleteTask(itemData.id));
+
+    setIsUpdating(false);
+  };
 
   const [alertMassage, setAlertMassage] = useState('');
   const [shouldShowAlert, setShouldShowAlert] = useState(false);
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [taskToBeUpdated, setTaskToBeUpdated] = useState({});
-  const [needUpdateData, setNeedUpdateData] = useState(false);
-
-  const reloadList = () => {
-    separateData();
-    setNeedUpdateData(!needUpdateData);
-  };
-
-  const taskCompleted = (itemData, isCompleted) => {
-    setCompletedTask(itemData, isCompleted);
-    reloadList();
-  };
-
-  const addNewTask = (taskContent) => {
-    if (taskContent.trim().length === 0) {
-      console.log('Here');
-      showAlert('Content cannot be blank');
-      return false;
-    }
-
-    const task = {
-      id: Math.random().toString(),
-      name: taskContent,
-      isCompleted: false,
-    };
-
-    DATA.push(task);
-    reloadList();
-
-    return true;
-  };
 
   function showAlert(message) {
     setAlertMassage(message);
@@ -106,7 +64,7 @@ export default function Main() {
         setIsUpdating(true);
         setTaskToBeUpdated(itemData);
       }}
-      onTaskCompleted={(itemData, isCompleted) => taskCompleted(itemData, isCompleted)}
+      onTaskCompleted={(itemData, isCompleted) => setTaskToBeCompleted(itemData, isCompleted)}
     />
   );
 
@@ -119,11 +77,10 @@ export default function Main() {
             <Text style={styles.listTile}>To Do</Text>
             <FlatList
               style={styles.list}
-              data={pendingTask}
+              data={pendingTasks}
               renderItem={renderItem}
               keyExtractor={(item) => item.id}
               bounces={false}
-              extraData={needUpdateData}
             />
           </View>
 
@@ -132,11 +89,10 @@ export default function Main() {
             <Text style={styles.listTile}>Completed</Text>
             <FlatList
               style={styles.list}
-              data={completedTask}
+              data={completedTasks}
               renderItem={renderItem}
               keyExtractor={(item) => item.id}
               bounces={false}
-              extraData={needUpdateData}
             />
           </View>
         </View>
@@ -146,6 +102,7 @@ export default function Main() {
         isUpdating={isUpdating}
         taskToBeUpdated={taskToBeUpdated}
         onAddButtonPressed={(text) => addNewTask(text)}
+        onDeleteButtonPressed={(task) => handleDeleteTask(task)}
       />
 
       <FlashAlert message={alertMassage} showAlert={shouldShowAlert} onFinished={() => setShouldShowAlert(false)} />

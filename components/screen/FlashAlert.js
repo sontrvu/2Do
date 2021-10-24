@@ -50,6 +50,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: '100%',
     padding: 10,
+    paddingHorizontal: 30,
   },
   flashAlertContainer: {
     flexDirection: 'row',
@@ -60,6 +61,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   flashAlertMessage: {
-    marginLeft: 5,
+    marginHorizontal: 5,
   },
 });
