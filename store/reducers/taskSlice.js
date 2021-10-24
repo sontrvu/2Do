@@ -17,7 +17,7 @@ export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async () => {
 export const addTask = createAsyncThunk('tasks/addTask', async (content, thunkAPI) => {
   let allTasks = [];
   let newTask = {
-    id: Math.random().toString(),
+    id: Math.random(),
     name: content,
     isCompleted: false,
   };
