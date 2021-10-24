@@ -1,94 +1,172 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async () => {
+  let allTasks = [];
+
+  try {
+    const jsonValue = await AsyncStorage.getItem('@allTasks');
+    allTasks = jsonValue != null ? JSON.parse(jsonValue) : tasks;
+  } catch (e) {
+    console.log(e);
+  }
+
+  return allTasks;
+});
+
+export const addTask = createAsyncThunk('tasks/addTask', async (content, thunkAPI) => {
+  let allTasks = [];
+  let newTask = {
+    id: Math.random().toString(),
+    name: content,
+    isCompleted: false,
+  };
+
+  try {
+    const jsonValue = await AsyncStorage.getItem('@allTasks');
+
+    allTasks = jsonValue != null ? JSON.parse(jsonValue) : [];
+    allTasks.push(newTask);
+
+    await AsyncStorage.setItem('@allTasks', JSON.stringify(allTasks));
+  } catch (e) {
+    console.log(e);
+  }
+
+  return allTasks;
+});
+
+export const updateTask = createAsyncThunk('tasks/updateTask', async (task, thunkAPI) => {
+  let allTasks = [];
+
+  try {
+    const jsonValue = await AsyncStorage.getItem('@allTasks');
+    allTasks = jsonValue != null ? JSON.parse(jsonValue) : [];
+
+    let idx = allTasks.findIndex((obj) => obj.id == task.id);
+    if (idx != -1) {
+      allTasks[idx].name = task.name;
+    }
+
+    await AsyncStorage.setItem('@allTasks', JSON.stringify(allTasks));
+  } catch (e) {
+    console.log(e);
+  }
+
+  return allTasks;
+});
+
+export const deleteTask = createAsyncThunk('tasks/deleteTask', async (taskId, thunkAPI) => {
+  let allTasks = [];
+
+  try {
+    const jsonValue = await AsyncStorage.getItem('@allTasks');
+    allTasks = jsonValue != null ? JSON.parse(jsonValue) : [];
+
+    let idx = allTasks.findIndex((obj) => obj.id == taskId);
+    if (idx != -1) {
+      allTasks.splice(idx, 1);
+    }
+
+    await AsyncStorage.setItem('@allTasks', JSON.stringify(allTasks));
+  } catch (e) {
+    console.log(e);
+  }
+
+  return allTasks;
+});
+
+export const setCompletedTask = createAsyncThunk('tasks/setCompletedTask', async (task, thunkAPI) => {
+  let allTasks = [];
+
+  try {
+    const jsonValue = await AsyncStorage.getItem('@allTasks');
+    allTasks = jsonValue != null ? JSON.parse(jsonValue) : [];
+
+    let idx = allTasks.findIndex((obj) => obj.id == task.id);
+    if (idx != -1) {
+      allTasks[idx].isCompleted = task.isCompleted;
+    }
+
+    await AsyncStorage.setItem('@allTasks', JSON.stringify(allTasks));
+  } catch (e) {
+    console.log(e);
+  }
+
+  return allTasks;
+});
 
 const taskSlice = createSlice({
   name: 'task',
 
   initialState: {
-    pendingTasks: [
-      {
-        id: '1',
-        name: 'YES YES',
-        isCompleted: false,
-      },
-      {
-        id: '2',
-        name: "It's WORKING",
-        isCompleted: false,
-      },
-      {
-        id: '3',
-        name: 'HAHAHAHA YEYEYEYE',
-        isCompleted: false,
-      },
-    ],
-
-    completedTasks: [
-      {
-        id: '4',
-        name: '4rd Item Hehehe',
-        isCompleted: true,
-      },
-    ],
+    pendingTasks: [],
+    completedTasks: [],
+    loading: false,
   },
 
-  reducers: {
-    addTask: (state, action) => {
-      state.pendingTasks.push({
-        id: Math.random().toString(),
-        name: action.payload,
-        isCompleted: false,
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchTasks.fulfilled, (state, action) => {
+        let allTasks = action.payload;
+
+        [state.pendingTasks, state.completedTasks] = allTasks.reduce(
+          (result, item) => {
+            result[item.isCompleted ? 1 : 0].push(item);
+            return result;
+          },
+          [[], []]
+        );
+      })
+
+      .addCase(addTask.fulfilled, (state, action) => {
+        let allTasks = action.payload;
+
+        [state.pendingTasks, state.completedTasks] = allTasks.reduce(
+          (result, item) => {
+            result[item.isCompleted ? 1 : 0].push(item);
+            return result;
+          },
+          [[], []]
+        );
+      })
+
+      .addCase(updateTask.fulfilled, (state, action) => {
+        let allTasks = action.payload;
+
+        [state.pendingTasks, state.completedTasks] = allTasks.reduce(
+          (result, item) => {
+            result[item.isCompleted ? 1 : 0].push(item);
+            return result;
+          },
+          [[], []]
+        );
+      })
+
+      .addCase(deleteTask.fulfilled, (state, action) => {
+        let allTasks = action.payload;
+
+        [state.pendingTasks, state.completedTasks] = allTasks.reduce(
+          (result, item) => {
+            result[item.isCompleted ? 1 : 0].push(item);
+            return result;
+          },
+          [[], []]
+        );
+      })
+
+      .addCase(setCompletedTask.fulfilled, (state, action) => {
+        let allTasks = action.payload;
+
+        [state.pendingTasks, state.completedTasks] = allTasks.reduce(
+          (result, item) => {
+            result[item.isCompleted ? 1 : 0].push(item);
+            return result;
+          },
+          [[], []]
+        );
       });
-    },
-
-    updateTask: (state, action) => {
-      let task = action.payload;
-
-      let pIdx = state.pendingTasks.findIndex((obj) => obj.id == task.id);
-      if (pIdx != -1) {
-        state.pendingTasks[pIdx].name = task.name;
-        return;
-      }
-
-      let cIdx = state.completedTasks.findIndex((obj) => obj.id == task.id);
-      if (cIdx != -1) {
-        state.completedTasks[cIdx].name = task.name;
-        return;
-      }
-    },
-
-    deleteTask: (state, action) => {
-      let taskId = action.payload;
-
-      let pIdx = state.pendingTasks.findIndex((obj) => obj.id == taskId);
-      if (pIdx != -1) {
-        state.pendingTasks.splice(pIdx, 1);
-        return;
-      }
-
-      let cIdx = state.completedTasks.findIndex((obj) => obj.id == taskId);
-      if (cIdx != -1) {
-        state.completedTasks.splice(cIdx, 1);
-        return;
-      }
-    },
-
-    setCompletedTask: (state, action) => {
-      let task = action.payload;
-
-      let allTasks = state.pendingTasks.concat(state.completedTasks);
-      let idx = allTasks.findIndex((obj) => obj.id == task.id);
-      allTasks[idx].isCompleted = task.isCompleted;
-
-      [state.pendingTasks, state.completedTasks] = allTasks.reduce(
-        (result, item) => {
-          result[item.isCompleted ? 1 : 0].push(item);
-          return result;
-        },
-        [[], []]
-      );
-    },
   },
 });
 
-export const { addTask, updateTask, deleteTask, setCompletedTask } = taskSlice.actions;
 export default taskSlice.reducer;
