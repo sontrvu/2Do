@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, Animated, FlatList, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as AppConstant from '../../helpers/AppConstant';
 
 export default function TaskList({ title, data, onCellPressed, onCheckPressed }) {
   const renderItem = ({ item }) => (
@@ -38,7 +39,7 @@ function Item({ itemData, onCellPressed, onCheckPressed }) {
     <TouchableOpacity style={styles.itemContainer} onPress={() => onCellPressed(itemData)}>
       <View>
         <TouchableOpacity onPress={handleCheckPressed}>
-          <Ionicons name={iconName} size={30} color="teal" />
+          <Ionicons name={iconName} size={30} color={AppConstant.PRIMARY_COLOR} />
         </TouchableOpacity>
       </View>
       <View style={styles.contentContainer}>

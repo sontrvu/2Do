@@ -3,10 +3,10 @@ import { StyleSheet, View, SafeAreaView, TouchableWithoutFeedback, Platform, Sta
 import TaskInput from './TaskInput';
 import FlashAlert from './FlashAlert';
 import TaskList from './TaskList';
+import * as AppConstant from '../../helpers/AppConstant';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchTasks, addTask, updateTask, deleteTask, setCompletedTask } from '../../store/reducers/taskSlice';
-
+import { fetchTasks, addTask, updateTask, deleteTask, setCompletedTask } from '../../actions/taskAction';
 export default function Main() {
   // Data logic handles
   const { pendingTasks, completedTasks } = useSelector((state) => state.task);
@@ -108,7 +108,7 @@ export default function Main() {
 
 const styles = StyleSheet.create({
   mainContainerView: {
-    backgroundColor: 'teal',
+    backgroundColor: AppConstant.PRIMARY_COLOR,
     height: '100%',
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },

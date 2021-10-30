@@ -10,6 +10,7 @@ import {
   Keyboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as AppConstant from '../../helpers/AppConstant';
 
 export default function TaskInput({
   isUpdating,
@@ -75,7 +76,7 @@ export default function TaskInput({
           }}
         />
         <TouchableOpacity style={styles.addButton} onPress={handleAddButtonPressed}>
-          <Ionicons name="arrow-up-circle" size={35} color="teal" />
+          <Ionicons name="arrow-up-circle" size={35} color={AppConstant.PRIMARY_COLOR} />
         </TouchableOpacity>
       </View>
 
@@ -94,7 +95,7 @@ export default function TaskInput({
           }}
         />
         <TouchableOpacity style={styles.updateButton} onPress={handleUpdateButtonPressed}>
-          <Ionicons name="arrow-up-circle-outline" size={35} color="teal" />
+          <Ionicons name="arrow-up-circle-outline" size={35} color={AppConstant.PRIMARY_COLOR} />
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
