@@ -12,22 +12,37 @@ import {
   Image,
 } from 'react-native';
 import * as AppConstant from '../../helpers/AppConstant';
+import FlashAlert from './FlashAlert';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { loginWithUser, registerUser } from '../../actions/userAction';
 
 export default function Login({ navigation }) {
-  const [email, setEmail] = useState('admin@2do.com.au');
-  const [password, setPassword] = useState('123456');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const [alertMassage, setAlertMassage] = useState('');
+  const [shouldShowAlert, setShouldShowAlert] = useState(false);
 
   const { requestId, user, loading, error, errorMessage } = useSelector((state) => state.user);
   const dispatch = useDispatch();
+
+  function showAlert(message) {
+    setAlertMassage(message);
+    setShouldShowAlert(true);
+  }
+
+  useEffect(() => {
+    if (error) {
+      showAlert(errorMessage);
+    }
+  }, [requestId, error]);
 
   function handleLogIn() {
     if (loading) return;
 
     if (!email || !password) {
-      console.log('Please enter email and password');
+      showAlert('Please enter email and password');
       return;
     }
 
@@ -97,6 +112,8 @@ export default function Login({ navigation }) {
           </TouchableOpacity>
         </View>
       )}
+
+      <FlashAlert message={alertMassage} showAlert={shouldShowAlert} onFinished={() => setShouldShowAlert(false)} />
     </SafeAreaView>
   );
 }
@@ -170,6 +187,7 @@ const styles = StyleSheet.create({
   buttonRegisterText: {
     fontSize: 15,
     fontWeight: 'bold',
+    paddingVertical: 10,
     color: AppConstant.PRIMARY_COLOR,
   },
 });

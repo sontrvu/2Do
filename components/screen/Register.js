@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as AppConstant from '../../helpers/AppConstant';
+import FlashAlert from './FlashAlert';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { loginWithUser, registerUser } from '../../actions/userAction';
@@ -22,8 +23,18 @@ export default function Register({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const [alertMassage, setAlertMassage] = useState('');
+  const [shouldShowAlert, setShouldShowAlert] = useState(false);
+
   const { requestId, user, loading, error, errorMessage } = useSelector((state) => state.user);
   const dispatch = useDispatch();
+
+  // Fetch tasks on app opening
+  useEffect(() => {
+    if (error) {
+      showAlert(errorMessage);
+    }
+  }, [requestId, error]);
 
   function handleBack() {
     navigation.goBack();
@@ -32,8 +43,8 @@ export default function Register({ navigation }) {
   function handleRegister() {
     if (loading) return;
 
-    if (!email || !password) {
-      console.log('Please enter email and password');
+    if (!fullName || !email || !password) {
+      showAlert('Please enter your name, email, and password');
       return;
     }
 
@@ -44,6 +55,11 @@ export default function Register({ navigation }) {
     };
 
     dispatch(registerUser(data));
+  }
+
+  function showAlert(message) {
+    setAlertMassage(message);
+    setShouldShowAlert(true);
   }
 
   return (
@@ -96,6 +112,8 @@ export default function Register({ navigation }) {
           </TouchableOpacity>
         </View>
       )}
+
+      <FlashAlert message={alertMassage} showAlert={shouldShowAlert} onFinished={() => setShouldShowAlert(false)} />
     </SafeAreaView>
   );
 }
