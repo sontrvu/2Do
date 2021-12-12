@@ -8,11 +8,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
+  Animated,
+  Easing,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, AntDesign } from '@expo/vector-icons';
 import * as AppConstant from '../../helpers/AppConstant';
 
 export default function TaskInput({
+  isLoading,
   isUpdating,
   selectedTask,
   onAddButtonPressed,
@@ -22,14 +25,36 @@ export default function TaskInput({
   // There are 2 inputs for add and update task, toggle to show only 1 and hide the other
   let addStyle = isUpdating ? { display: 'none' } : {};
   let updateStyle = isUpdating ? {} : { display: 'none' };
+  let loadingStyle = {}; // isLoading ? { backgroundColor: '#999' } : {};
 
   let newTaskTextInput;
   let uppdateTaskTextInput;
   const [addText, setAddText] = useState('');
   const [updateText, setUpdateText] = useState(selectedTask.name);
 
-  // Show keyboard and update task input content when a task is selected to edit
+  // Loading icon rotate animation
+  let rotateValueHolder = new Animated.Value(0);
+  const rotateData = rotateValueHolder.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  const animationLoop = Animated.loop(
+    Animated.timing(rotateValueHolder, {
+      toValue: 1,
+      duration: 1200,
+      easing: Easing.linear,
+      useNativeDriver: false,
+    })
+  );
+
   useEffect(() => {
+    // Start loading icon animation
+    animationLoop.start();
+  }, [isLoading]);
+
+  useEffect(() => {
+    // Show keyboard and update task input content when a task is selected to edit
     if (isUpdating) {
       uppdateTaskTextInput.focus();
     } else {
@@ -65,7 +90,7 @@ export default function TaskInput({
       {/* Only show either add or update input */}
 
       {/* Add task input */}
-      <View style={[styles.bottomInputContainer, addStyle]}>
+      <View style={[styles.bottomInputContainer, addStyle, loadingStyle]}>
         <TextInput
           style={styles.bottomTextInput}
           placeholder={'Add a new task'}
@@ -75,9 +100,15 @@ export default function TaskInput({
             newTaskTextInput = input;
           }}
         />
-        <TouchableOpacity style={styles.addButton} onPress={handleAddButtonPressed}>
-          <Ionicons name="arrow-up-circle" size={35} color={AppConstant.PRIMARY_COLOR} />
-        </TouchableOpacity>
+        {isLoading ? (
+          <Animated.View style={[styles.loadingIcon, { transform: [{ rotate: rotateData }] }]}>
+            <Ionicons name="sync-circle-sharp" size={35} color={AppConstant.PRIMARY_COLOR} />
+          </Animated.View>
+        ) : (
+          <TouchableOpacity style={styles.addButton} onPress={handleAddButtonPressed}>
+            <Ionicons name="arrow-up-circle" size={35} color={AppConstant.PRIMARY_COLOR} />
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Update task input */}
@@ -115,6 +146,10 @@ const styles = StyleSheet.create({
   bottomTextInput: {
     flex: 1,
     paddingLeft: 10,
+  },
+  loadingIcon: {
+    paddingLeft: 2,
+    // backgroundColor: 'red',
   },
   addButton: {
     alignItems: 'flex-end',

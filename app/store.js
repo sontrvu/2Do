@@ -1,8 +1,14 @@
-import { configureStore } from '@reduxjs/toolkit';
-import taskReducer from '../reducers/taskSlice';
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
+import taskSlice from '../reducers/taskSlice';
+import userSlice from '../reducers/userSlice';
 
-export default configureStore({
-  reducer: {
-    task: taskReducer,
-  },
+const rootReducer = combineReducers({
+  task: taskSlice,
+  user: userSlice,
 });
+
+const store = configureStore({
+  reducer: rootReducer,
+});
+
+export default store;

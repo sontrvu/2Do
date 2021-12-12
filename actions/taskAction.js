@@ -1,100 +1,92 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { fbAuth, fbFirestore } from '../app/firebase';
+import firebase, { fbFirestore } from '../app/firebase';
 
-const fetchTasks = createAsyncThunk('tasks/fetchTasks', async () => {
-  let allTasks = [];
+const fetchTasks = createAsyncThunk('tasks/fetchTasks', async (data, thunkAPI) => {
+  let tasks = [];
+  let userDoc = await fbFirestore.collection('users').doc(data.uid).get();
+  let taskIds = userDoc.data().tasks || [];
 
-  try {
-    const jsonValue = await AsyncStorage.getItem('@allTasks');
-    allTasks = jsonValue != null ? JSON.parse(jsonValue) : tasks;
-  } catch (e) {
-    console.log(e);
+  if (taskIds.length > 0) {
+    // Get all tasks from user's task list
+    let taskDocs = await fbFirestore
+      .collection('tasks')
+      .where(firebase.firestore.FieldPath.documentId(), 'in', taskIds)
+      .get();
+
+    tasks = taskDocs.docs.map((doc) => {
+      return { id: doc.id, ...doc.data() };
+    });
   }
 
-  return allTasks;
+  return tasks;
 });
 
-const addTask = createAsyncThunk('tasks/addTask', async (content, thunkAPI) => {
-  let allTasks = [];
-  let newTask = {
-    id: Math.random(),
-    name: content,
+const emptyTasksBoard = createAsyncThunk('tasks/emptyTasksBoard', async (data, thunkAPI) => {
+  // ??
+  return {};
+});
+
+const addTask = createAsyncThunk('tasks/addTask', async (data, thunkAPI) => {
+  // const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  // await sleep(10000);
+  // throw new Error('Error adding task');
+
+  let task = {
+    name: data.taskContent,
+    content: data.taskContent,
     isCompleted: false,
   };
 
-  try {
-    const jsonValue = await AsyncStorage.getItem('@allTasks');
+  // Add new task to tasks collection
+  let response = await fbFirestore.collection('tasks').add(task);
 
-    allTasks = jsonValue != null ? JSON.parse(jsonValue) : [];
-    allTasks.push(newTask);
+  // Add new task ID to user's task list
+  await fbFirestore
+    .collection('users')
+    .doc(data.uid)
+    .update({
+      tasks: firebase.firestore.FieldValue.arrayUnion(response.id),
+    });
 
-    await AsyncStorage.setItem('@allTasks', JSON.stringify(allTasks));
-  } catch (e) {
-    console.log(e);
-  }
-
-  return allTasks;
+  let payload = { id: response.id, ...task };
+  return payload;
 });
 
-const updateTask = createAsyncThunk('tasks/updateTask', async (task, thunkAPI) => {
-  let allTasks = [];
+const updateTask = createAsyncThunk('tasks/updateTask', async (data, thunkAPI) => {
+  await fbFirestore.collection('tasks').doc(data.task.id).update({
+    name: data.task.name,
+    isCompleted: data.task.isCompleted,
+  });
 
-  try {
-    const jsonValue = await AsyncStorage.getItem('@allTasks');
-    allTasks = jsonValue != null ? JSON.parse(jsonValue) : [];
+  // const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  // await sleep(2000);
 
-    let idx = allTasks.findIndex((obj) => obj.id == task.id);
-    if (idx != -1) {
-      allTasks[idx].name = task.name;
-    }
-
-    await AsyncStorage.setItem('@allTasks', JSON.stringify(allTasks));
-  } catch (e) {
-    console.log(e);
-  }
-
-  return allTasks;
+  return data.task;
 });
 
-const deleteTask = createAsyncThunk('tasks/deleteTask', async (taskId, thunkAPI) => {
-  let allTasks = [];
+const deleteTask = createAsyncThunk('tasks/deleteTask', async (data, thunkAPI) => {
+  // Delete task from tasks collection
+  await fbFirestore.collection('tasks').doc(data.task.id).delete();
 
-  try {
-    const jsonValue = await AsyncStorage.getItem('@allTasks');
-    allTasks = jsonValue != null ? JSON.parse(jsonValue) : [];
+  // Delete task ID from user's task list
+  await fbFirestore
+    .collection('users')
+    .doc(data.uid)
+    .update({
+      tasks: firebase.firestore.FieldValue.arrayRemove(data.task.id),
+    });
 
-    let idx = allTasks.findIndex((obj) => obj.id == taskId);
-    if (idx != -1) {
-      allTasks.splice(idx, 1);
-    }
-
-    await AsyncStorage.setItem('@allTasks', JSON.stringify(allTasks));
-  } catch (e) {
-    console.log(e);
-  }
-
-  return allTasks;
+  let payload = { id: data.task.id };
+  return payload;
 });
 
-const setCompletedTask = createAsyncThunk('tasks/setCompletedTask', async (task, thunkAPI) => {
-  let allTasks = [];
+const setCompletedTask = createAsyncThunk('tasks/setCompletedTask', async (data, thunkAPI) => {
+  await fbFirestore.collection('tasks').doc(data.task.id).update({
+    name: data.task.name,
+    isCompleted: data.task.isCompleted,
+  });
 
-  try {
-    const jsonValue = await AsyncStorage.getItem('@allTasks');
-    allTasks = jsonValue != null ? JSON.parse(jsonValue) : [];
-
-    let idx = allTasks.findIndex((obj) => obj.id == task.id);
-    if (idx != -1) {
-      allTasks[idx].isCompleted = task.isCompleted;
-    }
-
-    await AsyncStorage.setItem('@allTasks', JSON.stringify(allTasks));
-  } catch (e) {
-    console.log(e);
-  }
-
-  return allTasks;
+  return data.task;
 });
 
-export { fetchTasks, addTask, updateTask, deleteTask, setCompletedTask };
+export { fetchTasks, emptyTasksBoard, addTask, updateTask, deleteTask, setCompletedTask };

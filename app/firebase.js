@@ -17,4 +17,5 @@ if (firebase.apps.length === 0) {
 const fbAuth = firebase.auth();
 const fbFirestore = firebase.firestore();
 
+export default firebase;
 export { fbAuth, fbFirestore };
